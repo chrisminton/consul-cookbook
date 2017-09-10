@@ -10,8 +10,6 @@ default['consul']['service_user'] = 'consul'
 default['consul']['service_group'] = 'consul'
 default['consul']['create_service_user'] = true
 
-default['consul']['config']['owner'] = 'consul'
-default['consul']['config']['group'] = 'consul'
 default['consul']['config']['path'] = join_path config_prefix_path, 'consul.json'
 default['consul']['config']['data_dir'] = data_path
 default['consul']['config']['ca_file'] = join_path config_prefix_path, 'ssl', 'CA', 'ca.crt'
@@ -22,7 +20,6 @@ default['consul']['config']['client_addr'] = '0.0.0.0'
 default['consul']['config']['ports'] = {
   'dns'      => 8600,
   'http'     => 8500,
-  'rpc'      => 8400,
   'serf_lan' => 8301,
   'serf_wan' => 8302,
   'server'   => 8300,
@@ -32,7 +29,7 @@ default['consul']['diplomat_version'] = nil
 
 default['consul']['service']['config_dir'] = join_path config_prefix_path, 'conf.d'
 
-default['consul']['version'] = '0.7.5'
+default['consul']['version'] = '0.8.3'
 
 # Windows only
 default['consul']['service']['nssm_params'] = {

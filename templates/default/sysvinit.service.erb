@@ -30,24 +30,25 @@ export PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
 . /lib/lsb/init-functions
 
 _start() {
-  touch $logfile
-  chown $user $logfile
-  start-stop-daemon --start --quiet --background \
-      --pidfile $pidfile<% unless @pid_file_external %> --make-pidfile<% end %> \
-      --chuid $user --chdir "<%= @directory %>" \
-      --startas /bin/bash -- -c "exec $exec <%= @daemon_options %> >> $logfile 2>&1"
+    touch $logfile
+    chown $user $logfile
+    echo "Starting consul"
+    start-stop-daemon --start --quiet --background \
+        --pidfile $pidfile<% unless @pid_file_external %> --make-pidfile<% end %> \
+        --chuid $user --chdir "<%= @directory %>" \
+        --startas /bin/bash -- -c "exec $exec <%= @daemon_options %> >> $logfile 2>&1"
 }
 
 _stop() {
-  start-stop-daemon --stop --quiet --pidfile $pidfile --user $user --retry="<%= @stop_signal %>"/30/KILL/5
+    start-stop-daemon --stop --quiet --pidfile $pidfile --user $user --retry="<%= @stop_signal %>"/30/KILL/5
 }
 
 _status() {
-  status_of_proc -p $pidfile $exec $prog
+    status_of_proc -p $pidfile $exec $prog
 }
 
 _reload() {
-  start-stop-daemon --stop --quiet --pidfile $pidfile --user $user --signal "<%= @reload_signal %>"
+    start-stop-daemon --stop --quiet --pidfile $pidfile --user $user --signal "<%= @reload_signal %>"
 }
 
 <%- else -%>
@@ -62,13 +63,13 @@ _start() {
 
     echo -n $"Starting <%= @name %>: "
     daemon \
-         --pidfile=$pidfile \
-         --user=$user \
-         " { $exec <%= @daemon_options %> >> $logfile 2>&1 & } ; echo \$! >| $pidfile "
-     RETVAL=$?
-     echo
-     [ $RETVAL -eq 0 ] && touch $lockfile
-     return $RETVAL
+        --pidfile=$pidfile \
+        --user=$user \
+        " { $exec <%= @daemon_options %> >> $logfile 2>&1 & } ; echo \$! >| $pidfile "
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && touch $lockfile
+    return $RETVAL
 }
 
 _stop() {

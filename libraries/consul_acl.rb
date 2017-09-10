@@ -39,6 +39,10 @@ module ConsulCookbook
       # @return [String]
       attribute(:rules, kind_of: String, default: '')
 
+      # @!attribute ssl
+      # @return [Hash]
+      attribute(:ssl, kind_of: Hash, default: {})
+
       def to_acl
         { 'ID' => id, 'Type' => type, 'Name' => acl_name, 'Rules' => rules }
       end
@@ -54,16 +58,18 @@ module ConsulCookbook
       def action_create
         configure_diplomat
         unless up_to_date?
-          Diplomat::Acl.create(new_resource.to_acl)
-          new_resource.updated_by_last_action(true)
+          converge_by 'creating ACL' do
+            Diplomat::Acl.create(new_resource.to_acl)
+          end
         end
       end
 
       def action_delete
         configure_diplomat
         unless Diplomat::Acl.info(new_resource.id).empty?
-          Diplomat::Acl.destroy(new_resource.id)
-          new_resource.updated_by_last_action(true)
+          converge_by 'destroying ACL' do
+            Diplomat::Acl.destroy(new_resource.id)
+          end
         end
       end
 
@@ -79,7 +85,7 @@ module ConsulCookbook
         Diplomat.configure do |config|
           config.url = new_resource.url
           config.acl_token = new_resource.auth_token
-          config.options = { request: { timeout: 10 } }
+          config.options = { ssl: new_resource.ssl, request: { timeout: 10 } }
         end
       end
 

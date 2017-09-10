@@ -16,7 +16,7 @@ describe ConsulCookbook::Resource::ConsulService do
       allow(shellout).to receive(:stderr)
       allow(shellout).to receive(:run_command)
       allow(shellout).to receive(:exitstatus)
-      allow(shellout).to receive(:stdout).and_return("Consul v0.7.5\nConsul Protocol: 3 (Understands back to: 1)\n")
+      allow(shellout).to receive(:stdout).and_return("Consul v0.8.3\nConsul Protocol: 3 (Understands back to: 1)\n")
 
       # Stub admin_user method since we are testing a Windows host via Linux
       # Fixed in https://github.com/poise/poise/commit/2f42850c82e295af279d060155bcd5c7ebb31d6a but not released yet
@@ -35,9 +35,41 @@ describe ConsulCookbook::Resource::ConsulService do
 
     it do
       expect(chef_run).to install_nssm('consul').with(
-        program: 'C:\Program Files\consul\0.7.5\consul.exe',
+        program: 'C:\Program Files\consul\0.8.3\consul.exe',
         args: 'agent -config-file="""C:\Program Files\consul\consul.json""" -config-dir="""C:\Program Files\consul\conf.d"""'
       )
+    end
+  end
+
+  describe 'reload' do
+    before do
+      default_attributes['consul'] = {
+        'config' => config,
+      }
+    end
+
+    recipe do
+      consul_service 'consul' do
+        action :reload
+      end
+    end
+
+    context 'with no ACL token' do
+      let(:config) { {} }
+      it do
+        is_expected.to run_execute('Reload consul').with(
+          command: 'consul.exe reload'
+        )
+      end
+    end
+
+    context 'with an ACL token' do
+      let(:config) { { 'acl_master_token' => 'my_token' } }
+      it do
+        is_expected.to run_execute('Reload consul').with(
+          command: 'consul.exe reload -token=my_token'
+        )
+      end
     end
   end
 end
